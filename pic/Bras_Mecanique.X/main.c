@@ -47,7 +47,7 @@ int16_t main(void)
 
     /* Initialize IO ports and peripherals */
     InitApp();
-
+    Init_Uart1();
     
    //main cycle 
     while(1)
@@ -55,21 +55,9 @@ int16_t main(void)
 
         PDC1 = 0;
         LED = !LED;
+         Transmit_String("wow");
         __delay_ms(1000);
-        LED = !LED;
-        PDC1 = 500;
-        __delay_ms(1000);
-        LED = !LED;
-        PDC1 = 1000;
-        __delay_ms(1000);
-        LED = !LED;
-        PDC1 = 1500;
-        __delay_ms(1000);
-        LED = !LED;
-        PDC1 = 2000;
-        __delay_ms(1000);
-        LED = !LED;
-        __delay_ms(1000);
+      
         
          
     }
