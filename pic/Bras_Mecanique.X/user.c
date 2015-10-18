@@ -15,6 +15,7 @@
 #include <stdbool.h>         /* For true/false definition                     */
 
 #include "user.h"            /* variables/params used by user.c               */
+#include "uart.h"
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -40,12 +41,13 @@ void InitApp(void)
     TRISBbits.TRISB6 = 0;
     direction1 = 1;
     
+    Init_Uart1();
     /* Initialize peripherals */
 }
 
-void delay (long repeats)
+void Delay (uint32_t repeats)
 {
-    long i=0;
+    uint32_t i=0;
     while (i<repeats)
     {i++;}
 }

@@ -16,7 +16,7 @@
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
-
+#include "uart.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -30,7 +30,7 @@
 
 int16_t main(void)
 {
-
+    
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
@@ -43,16 +43,16 @@ int16_t main(void)
     while(1)
     {
         PDC1 = 0;
-        delay(200000);
+        Delay(200000);
         
         PDC1 = 500;
-        delay(200000);
+        Delay(200000);
         PDC1 = 1000;
-        delay(200000);
+        Delay(200000);
         PDC1 = 1500;
-        delay(200000);
+        Delay(200000);
         PDC1 = 2000;
-        delay(200000);
+        Delay(200000);
         
     }
 }

@@ -15,4 +15,4 @@ void InitApp(void); /* I/O and Peripheral Initialization */
 #define LED LATFbits.LATF6
 #define direction1 LATBbits.LATB6
 
-void delay (long repeats);
+void Delay (uint32_t repeats);
