@@ -57,7 +57,8 @@
 void InitApp(void); /* I/O and Peripheral Initialization */
 
 
-void delay (long repeats);
+
+
 long map(long x, long in_min, long in_max, long out_min, long out_max);
 
 // runs motor on port(1-6) with speed from -100 to 100)

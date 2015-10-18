@@ -8,21 +8,21 @@
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
-
+#include "uart.h"
 
 
 
 
 volatile char TX_Buff[UART_SIZE_BUFF] = {'f'};
-volatile u16  i_TX_Buff = 1;
+volatile uint16_t  i_TX_Buff = 1;
 
 volatile char RX_Buff[UART_SIZE_BUFF];
-volatile u16 i_RX_Buff = 0;
+volatile uint16_t i_RX_Buff = 0;
 
 
 void Init_Uart1(void)
 {
-    u32 val32 = FCY;
+    uint32_t val32 = FCY;
     U1MODEbits.ALTIO = 1;       // utilisation des pina alternatives de l'uart 1
     U1STAbits.UTXISEL = 0;      // mode d'interuption de transmit
                                 // interrupt receive à chaque caractère
@@ -62,7 +62,7 @@ void Init_Uart1(void)
 
 void __attribute__((interrupt,auto_psv)) _U1TXInterrupt(void)
 {
-    static u16 i_TX_Transmit = 0;
+    static uint16_t i_TX_Transmit = 0;
 
     IFS0bits.U1TXIF = 0;
     U1TXREG = TX_Buff[i_TX_Transmit];
@@ -87,7 +87,7 @@ void __attribute__((interrupt,auto_psv)) _U1RXInterrupt(void)
 
 void Transmit_String(char *str)
 {
-    u16 i = i_TX_Buff;
+    uint16_t i = i_TX_Buff;
     char c;
     c = *str;
 
@@ -104,9 +104,9 @@ void Transmit_String(char *str)
     IEC0bits.U1TXIE = 1;
 }
 
-u8 Get_Uart(char *c)
+uint8_t Get_Uart(char *c)
 {
-    static u16 i_RX = 0;
+    static uint16_t i_RX = 0;
 
     if (i_RX != i_RX_Buff) { // si il y a qq chose dans le buffer
         *c = RX_Buff[i_RX];
