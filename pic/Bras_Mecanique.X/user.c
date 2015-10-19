@@ -13,9 +13,11 @@
 
 #include <stdint.h>          /* For uint32_t definition                       */
 #include <stdbool.h>         /* For true/false definition                     */
+#include <stdlib.h>
 
 #include "user.h"            /* variables/params used by user.c               */
 #include "uart.h"
+
 
 /******************************************************************************/
 /* User Functions                                                             */

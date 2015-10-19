@@ -41,7 +41,7 @@
 
 int16_t main(void)
 {
-    
+    char c;
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
@@ -54,10 +54,14 @@ int16_t main(void)
     {
 
         PDC1 = 0;
-        LED = !LED;
          Transmit_String("wow");
         __delay_ms(1000);
-      
+        
+        if (Get_Uart(&c)) {
+            if (c == 'l' || c == 'L') {
+                LED = !LED;
+            }
+        }
         
          
     }
