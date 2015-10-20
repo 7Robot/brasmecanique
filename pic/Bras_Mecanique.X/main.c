@@ -54,7 +54,8 @@ int16_t main(void)
     {
 
         PDC1 = 0;
-         Transmit_String("wow");
+        int te = 1000;
+         Transmit_String(te);
         __delay_ms(1000);
         
         if (Get_Uart(&c)) {
@@ -62,7 +63,7 @@ int16_t main(void)
                 LED = !LED;
             }
         }
-        
+        TEST;
          
     }
 }

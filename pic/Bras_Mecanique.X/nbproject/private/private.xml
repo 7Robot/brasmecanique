@@ -3,11 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/github/bras_mecanique/pic/Bras_Mecanique.X/system.c</file>
-            <file>file:/E:/github/bras_mecanique/pic/Bras_Mecanique.X/user.c</file>
-            <file>file:/E:/github/bras_mecanique/pic/Bras_Mecanique.X/uart.c</file>
-            <file>file:/E:/github/bras_mecanique/pic/Bras_Mecanique.X/user.h</file>
-            <file>file:/E:/github/bras_mecanique/pic/Bras_Mecanique.X/main.c</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/system.h</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/user.c</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/main.c</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/user.h</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/uart.c</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/uart.h</file>
         </group>
     </open-files>
 </project-private>
