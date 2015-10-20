@@ -29,3 +29,4 @@
 /******************************************************************************/
 
 /* TODO Fill in your configuration bits from the config bits generator here.  */
+#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)

@@ -47,22 +47,30 @@ int16_t main(void)
 
     /* Initialize IO ports and peripherals */
     InitApp();
-    Init_Uart1();
+   // Init_Uart1();
     
    //main cycle 
     while(1)
     {
 
         PDC1 = 0;
-         Transmit_String("wow");
-        __delay_ms(1000);
+        //Transmit_Int(128);
+        char mystring[] = "123";
+        int i = 0;
         
-        if (Get_Uart(&c)) {
-            if (c == 'l' || c == 'L') {
-                LED = !LED;
-            }
-        }
+        i = atoi(mystring);
+        i = i*2;
         
+         Transmit_Char("12");
+
+               __delay_ms(30000);
+        
+//        if (Get_Uart(&c)) {
+//            if (c == 'l' || c == 'L') {
+//                LED = !LED;
+//            }
+//        }
+      
          
     }
 }
