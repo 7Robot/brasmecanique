@@ -54,16 +54,16 @@ int16_t main(void)
     {
 
         PDC1 = 0;
-        int te = 1000;
-         Transmit_String(te);
-        __delay_ms(1000);
+        //Transmit_Int(128);
+         Transmit_String("z");
+               __delay_ms(500);
         
-        if (Get_Uart(&c)) {
-            if (c == 'l' || c == 'L') {
-                LED = !LED;
-            }
-        }
-        TEST;
+//        if (Get_Uart(&c)) {
+//            if (c == 'l' || c == 'L') {
+//                LED = !LED;
+//            }
+//        }
+      
          
     }
 }

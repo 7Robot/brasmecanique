@@ -85,24 +85,77 @@ void __attribute__((interrupt,auto_psv)) _U1RXInterrupt(void)
 }
 
 
-void Transmit_String(char *str)
-{
-    uint16_t i = i_TX_Buff;
-    char c;
-    c = *str;
+//void Transmit_String(char *str)
+//{
+//    uint16_t i = i_TX_Buff;
+//    char c;
+//    c = *str;
+//
+//    while (c != 0)
+//    {
+//        TX_Buff[i] = c;
+//        i++;
+//        if (i == UART_SIZE_BUFF)
+//            i = 0;
+//        str++;
+//        c = *str;
+//    }
+//    i_TX_Buff = i;
+//    IEC0bits.U1TXIE = 1;
+//}
 
-    while (c != 0)
+void Transmit_String(char *str) // lets send "abc"
+{
+    uint16_t i = i_TX_Buff; //1
+    char c;
+	uint16_t must_send = 0;
+    c = *str; //placing here address of the first character in string ("a"))
+
+    while (c != 0) // while we're not reached the end of the string
     {
-        TX_Buff[i] = c;
-        i++;
-        if (i == UART_SIZE_BUFF)
-            i = 0;
-        str++;
+        TX_Buff[i] = c; // 1)place char in buffer [1] 
+        i++; //i=2
+        if (i == UART_SIZE_BUFF)// if we reached end of the buffer
+            i = 0;              // write to bottom of buffer
+        str++; // going to next character 
         c = *str;
+		must_send = 1;
     }
+	if (must_send) {
+		i_TX_Buff = i;
+		IEC0bits.U1TXIE = 1; // enabling TX interrupts (calling for transmission))
+	}
+}
+
+
+}
+
+void Transmit_Char(char *symbol)
+{
+    IEC0bits.U1TXIE = 0;
+    
+uint16_t i = i_TX_Buff;
+//    int c;
+//    c = *integer;
+//
+//    while (c != 0)
+//    {
+        TX_Buff[i] = *symbol;
+//        i++;
+//        if (i == UART_SIZE_BUFF)
+//            i = 0;
+//        integer++;
+//        c = *integer;
+//    }
+        i++;
+if (i == UART_SIZE_BUFF)
+    {i = 0;}
+//        integer++;
+     
     i_TX_Buff = i;
     IEC0bits.U1TXIE = 1;
 }
+
 
 uint8_t Get_Uart(char *c)
 {
