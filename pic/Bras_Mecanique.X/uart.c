@@ -16,7 +16,8 @@
 volatile char TX_Buff[UART_SIZE_BUFF] = {'f'};
 volatile uint16_t i_TX_Buff = 1;
 
-volatile char RX_Buff[UART_SIZE_BUFF];
+volatile int RX_Buff[UART_SIZE_BUFF];
+//volatile char RX_Buff[UART_SIZE_BUFF];
 volatile uint16_t i_RX_Buff = 0;
 
 void Init_Uart1(void) {
@@ -118,7 +119,20 @@ void Transmit_Char(char *symbol) {
 }
 
 
-uint8_t Get_Uart(char *c) {
+//uint8_t Get_Uart(char *c) {
+//    static uint16_t i_RX = 0;
+//
+//    if (i_RX != i_RX_Buff) { // si il y a qq chose dans le buffer
+//        *c = RX_Buff[i_RX];
+//        i_RX++;
+//        if (i_RX == UART_SIZE_BUFF)
+//            i_RX = 0;
+//        return 1;
+//    } else {
+//        return 0;
+//    }
+//}
+uint16_t Get_Uart(char *c) {
     static uint16_t i_RX = 0;
 
     if (i_RX != i_RX_Buff) { // si il y a qq chose dans le buffer
