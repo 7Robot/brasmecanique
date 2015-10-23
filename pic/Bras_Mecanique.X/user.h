@@ -20,11 +20,11 @@
 #define directionPin6 LATBbits.LATB8
 
 //POTs pins mode 
-#define potPin1mode  TRISBbits.RB0
-#define potPin2mode  TRISBbits.RB1
-#define potPin3mode  TRISBbits.RB2
-#define potPin4mode  TRISBbits.RB3
-#define potPin5mode  TRISBbits.RB4
+#define potPin1mode  TRISBbits.TRISB0
+#define potPin2mode  TRISBbits.TRISB1
+#define potPin3mode  TRISBbits.TRISB2
+#define potPin4mode  TRISBbits.TRISB3
+#define potPin5mode  TRISBbits.TRISB4
 
 //POTs pins 
 #define potPin1  PORTBbits.RB0
@@ -55,6 +55,8 @@
 /* TODO User level functions prototypes (i.e. InitApp) go here */
 
 void InitApp(void); /* I/O and Peripheral Initialization */
+
+int analogRead(void);
 
 void Delay(uint32_t repeats);
 

@@ -57,35 +57,12 @@ int16_t main(void) {
     InitApp();
     // Init_Uart1();
 
-    //main cycle 
+  ADCON1bits.ADON = 1; // turn on ADC here
     while (1) {
-
-        PDC1 = 0;
-        receiveCommand();
+//        PDC1 = 0;
+//        receiveCommand();
+        int value = analogRead();
+        
+        
 }
 }
-// char *itoa(char *buffer, int i) {
-// unsigned int n;
-// unsigned int negate = 0;
-// int c = 6;
-// 
-// if (i < 0) {
-// negate=1;
-// n = -i;
-// } else if (i == 0) {
-// buffer[0] = '0';
-// buffer[1] = 0;
-// return buffer;
-// } else {
-// n = i;
-// }
-// buffer[c--] = 0;
-// do {
-// buffer[c--] = (n % 10) + '0';
-// n = n / 10;
-// } while (n);
-// if (negate) {
-// buffer[c--] = '-';
-// }
-// return &buffer[c+1];
-// }
