@@ -22,9 +22,9 @@
 *genesis.properties
 
 # MPLAB-X folders
-#nbproject
-#build
-#dist
+pic/Bras_Mecanique.X/nbproject/
+pic/Bras_Mecanique.X/build/
+pic/Bras_Mecanique.X/dist/
 
 # Sublime text
 *.sublime-project

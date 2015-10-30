@@ -38,6 +38,7 @@
 /******************************************************************************/
 
 volatile int coordinates [5] = {0, 0, 0, 0, 0};
+volatile int pot [5] = {0, 0, 0, 0, 0};
 int c1, c2, c3, c4, c5 = 0;
 
 char buffer[30];
@@ -57,12 +58,14 @@ int16_t main(void) {
     InitApp();
     // Init_Uart1();
 
-  ADCON1bits.ADON = 1; // turn on ADC here
+    ADCON1bits.ADON = 1; // turn on ADC here
     while (1) {
-//        PDC1 = 0;
-//        receiveCommand();
-        int value = analogRead();
-        
-        
-}
+        //        PDC1 = 0;
+        //  receiveCommand();
+
+        scanPots();
+        __delay_ms(10);
+
+
+    }
 }

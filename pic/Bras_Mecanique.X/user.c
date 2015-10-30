@@ -24,8 +24,8 @@
 /******************************************************************************/
 
 /* <Initialize variables in user.h and insert code for user algorithms.> */
+extern volatile int pot[];
 
-/* TODO Initialize User Ports/Peripherals/Project here */
 
 void InitApp(void) {
     /* Setup analog functionality and port direction */
@@ -78,13 +78,13 @@ void InitApp(void) {
 
     //----------ANALOG INPUTS CONFIGURATION-------------
     //Ports configuration
-    ADPCFG = 0b0000000000011111; //configure AN0-AN5 as analog inputs
+    ADPCFG = 0b111111111100000; //configure AN0-AN5 as analog inputs
     ADCON2bits.VCFG = 0b000; // Voltage reference is AVdd-AVss
     ADCON3bits.ADRC = 0; // Clock derived from system clock
-    ADCON3bits.ADCS = 0b000001; //A/D conversion clock = TCY
+    ADCON3bits.ADCS = 0b000011; //A/D conversion clock = 4xTCY
     ADCON2bits.CHPS = 0b00; //using only one channel
     ADCON1bits.SIMSAM = 0; //multiple channels sampled sequentially
-    ADCSSL = 0b0000000000000001; //A/D Input Pin Scan Selection - scan AN0 only
+    ADCSSL = 0b0000000000000000; //A/D Input Pin Scan Selection - no scan, manual reading
     ADCHSbits.CH0SA = 0b0000; //Channel 0 positive input is AN0       
     ADCHSbits.CH0NA = 0b0; //Channel 0 negative input is VREF-     
     ADCON1bits.SSRC = 0b111; // Conversion Trigger Source - Internal counter ends sampling and starts conversion (auto convert)
@@ -97,16 +97,41 @@ void InitApp(void) {
     ADCON1bits.ADSIDL = 0; // Continue module operation in Idle mode
 
     ADCON1bits.ADON = 0; // A/D converter module is operating/off
-    //!!!! this is another BIG SWITHC
+    //!!!! this is another BIG SWITCH
 
 
     Init_Uart1();
     /* Initialize peripherals */
 }
 
-int analogRead(void) {
+
+
+int analogRead(int port) {
     int value;
-      
+
+    switch (port) {
+        case 0:
+            ADCHSbits.CH0SA = 0x0; //Channel 0 positive input is AN0  
+            break;
+
+        case 1:
+            ADCHSbits.CH0SA = 0x1; //Channel 0 positive input is AN1  
+            break;
+
+        case 2:
+            ADCHSbits.CH0SA = 0x2; //Channel 0 positive input is AN2  
+            break;
+
+        case 3:
+            ADCHSbits.CH0SA = 0x3; //Channel 0 positive input is AN3  
+            break;
+
+        case 4:
+            ADCHSbits.CH0SA = 0x4; //Channel 0 positive input is AN4  
+            break;
+
+    }
+
     ADCON1bits.SAMP = 1; // start sampling  
     // ???converting should start automatically after sampling ends as set in ADCON1bits.SSRC???
     // ??? is ADCON1bits.DONE set to zero as SAMPLING begins ?
@@ -114,7 +139,7 @@ int analogRead(void) {
     value = ADCBUF0;
     return value;
 
-    //TODO add other pins as argument 
+
 }
 
 void Delay(uint32_t repeats) {
@@ -122,6 +147,16 @@ void Delay(uint32_t repeats) {
     while (i < repeats) {
         i++;
     }
+}
+
+void scanPots(void)
+
+{
+    int i = 0;
+        for (i = 0; i < 5; i++)
+        {
+            pot[i] = analogRead(i);
+        }
 }
 
 long map(long x, long in_min, long in_max, long out_min, long out_max) {

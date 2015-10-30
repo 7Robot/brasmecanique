@@ -46,6 +46,7 @@
 #define thermalPin PORTBbits.RB5
 
 
+
 /* TODO Application specific user parameters used in user.c may go here */
 
 /******************************************************************************/
@@ -56,7 +57,9 @@
 
 void InitApp(void); /* I/O and Peripheral Initialization */
 
-int analogRead(void);
+int analogRead(int port);
+
+void scanPots (void);
 
 void Delay(uint32_t repeats);
 
