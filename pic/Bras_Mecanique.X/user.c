@@ -150,13 +150,12 @@ void Delay(uint32_t repeats) {
 }
 
 void scanPots(void)
-
 {
     int i = 0;
-        for (i = 0; i < 5; i++)
-        {
-            pot[i] = analogRead(i);
-        }
+    for (i = 0; i < 5; i++)
+    {
+        pot[i] = analogRead(i);
+    }
 }
 
 long map(long x, long in_min, long in_max, long out_min, long out_max) {

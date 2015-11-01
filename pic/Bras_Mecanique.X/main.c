@@ -32,13 +32,18 @@
 
 #include "uart.h"
 
-
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 
 volatile int coordinates [5] = {0, 0, 0, 0, 0};
 volatile int pot [5] = {0, 0, 0, 0, 0};
+
+// 0 : 0/360/644 : Z axis
+// 1 : 385/217
+// 2 : 579/350
+// 3 : 0/400   400 = 360deg
+// 4 : 
 int c1, c2, c3, c4, c5 = 0;
 
 char buffer[30];
@@ -50,7 +55,7 @@ int coordMassivePointer = 0;
 /******************************************************************************/
 
 int16_t main(void) {
-
+    int i;
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
@@ -64,8 +69,15 @@ int16_t main(void) {
         //  receiveCommand();
 
         scanPots();
-        __delay_ms(10);
-
+        
+        for (i = 0; i<5; i++) {
+            sprintf (&buffer[0], "%d: %d\r\n", i, pot[i]);
+            __delay_ms (10);
+            Transmit_String(&buffer[0]);
+            __delay_ms (20);
+        }
+        __delay_ms(1000);
+        LED = !LED;
 
     }
 }
