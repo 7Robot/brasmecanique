@@ -1,0 +1,1252 @@
+Disassembly Listing for Bras_Mecanique
+Generated From:
+C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/dist/default/debug/Bras_Mecanique.X.debug.elf
+14.11.2015 18:53:10
+
+---  C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/user.c  --------------------------
+1:                 /******************************************************************************/
+2:                 /* Files to Include                                                           */
+3:                 /******************************************************************************/
+4:                 
+5:                 /* Device header file */
+6:                 #if defined(__XC16__)
+7:                 #include <xc.h>
+8:                 #elif defined(__C30__)
+9:                 #if defined(__dsPIC30F__)
+10:                #include <p30Fxxxx.h>
+11:                #endif
+12:                #endif
+13:                
+14:                #include <stdint.h>          /* For uint32_t definition                       */
+15:                #include <stdbool.h>         /* For true/false definition                     */
+16:                #include <stdlib.h>
+17:                
+18:                #include "user.h"            /* variables/params used by user.c               */
+19:                #include "uart.h"
+20:                
+21:                
+22:                /******************************************************************************/
+23:                /* User Functions                                                             */
+24:                /******************************************************************************/
+25:                
+26:                /* <Initialize variables in user.h and insert code for user algorithms.> */
+27:                extern volatile int pot[];
+28:                
+29:                
+30:                void InitApp(void) {
+000360  FA0000     LNK #0x0
+31:                    /* Setup analog functionality and port direction */
+32:                
+33:                    //setup LED pin
+34:                    TRISFbits.TRISF6 = 0;
+000362  A9C2DE     BCLR TRISF, #6
+35:                    LATFbits.LATF6 = 0;
+000364  A9C2E2     BCLR LATF, #6
+36:                
+37:                    //Configuring PWM timer period
+38:                    PTCONbits.PTEN = 1; //enable PWM timer
+000366  A8E1C1     BSET 0x1C1, #7
+39:                    PTPER = 1000; // set PWM period
+000368  203E80     MOV #0x3E8, W0
+00036A  880E20     MOV W0, PTPER
+40:                
+41:                    PWMCON1 = 0; //deattaching all PWM pins from timer
+00036C  EF21C8     CLR PWMCON1
+42:                    PWMCON1bits.PEN1H = 1; // attach PWM1 to timer
+00036E  A881C8     BSET PWMCON1, #4
+43:                    PWMCON1bits.PEN2H = 1; // attach PWM2 to timer
+000370  A8A1C8     BSET PWMCON1, #5
+44:                    PWMCON1bits.PEN3H = 1; // attach PWM3 to timer
+000372  A8C1C8     BSET PWMCON1, #6
+45:                    //TODO configure PWMs 4,5,6
+46:                
+47:                    PDC1 = 500;
+000374  201F40     MOV #0x1F4, W0
+000376  880EB0     MOV W0, PDC1
+48:                
+49:                    // configure direction pins as OUTPUTS
+50:                    directionPin1mode = 0;
+000378  A9C2C6     BCLR TRISB, #6
+51:                    directionPin2mode = 0;
+00037A  A9E2CD     BCLR 0x2CD, #7
+52:                    directionPin3mode = 0;
+00037C  A982D8     BCLR TRISE, #4
+53:                    directionPin4mode = 0;
+00037E  A902D8     BCLR TRISE, #0
+54:                    directionPin5mode = 0;
+000380  A942D8     BCLR TRISE, #2
+55:                    directionPin6mode = 0;
+000382  A902C7     BCLR 0x2C7, #0
+56:                
+57:                
+58:                    //set all direction pins LOW
+59:                    directionPin1 = 0;
+000384  A9C2CA     BCLR LATB, #6
+60:                    directionPin2 = 0;
+000386  A9E2D1     BCLR 0x2D1, #7
+61:                    directionPin3 = 0;
+000388  A982DC     BCLR LATE, #4
+62:                    directionPin4 = 0;
+00038A  A902DC     BCLR LATE, #0
+63:                    directionPin5 = 0;
+00038C  A942DC     BCLR LATE, #2
+64:                    directionPin6 = 0;
+00038E  A902CB     BCLR 0x2CB, #0
+65:                
+66:                    //set courseEndPin as INPUT
+67:                    courseEndPinMode = 1;
+000390  A802D9     BSET 0x2D9, #0
+68:                
+69:                    //set thermal protection pin as input 
+70:                    thermalPinMode = 1;
+000392  A8A2C6     BSET TRISB, #5
+71:                
+72:                    // set TRIS bits ports to be INPUTS
+73:                    potPin1mode = 1;
+000394  A802C6     BSET TRISB, #0
+74:                    potPin2mode = 1;
+000396  A822C6     BSET TRISB, #1
+75:                    potPin3mode = 1;
+000398  A842C6     BSET TRISB, #2
+76:                    potPin4mode = 1;
+00039A  A862C6     BSET TRISB, #3
+77:                    potPin5mode = 1;
+00039C  A882C6     BSET TRISB, #4
+78:                
+79:                    //----------ANALOG INPUTS CONFIGURATION-------------
+80:                    //Ports configuration
+81:                    ADPCFG = 0b111111111100000; //configure AN0-AN5 as analog inputs
+00039E  27FE00     MOV #0x7FE0, W0
+0003A0  881540     MOV W0, ADPCFG
+82:                    ADCON2bits.VCFG = 0b000; // Voltage reference is AVdd-AVss
+0003A2  801510     MOV ADCON2, W0
+0003A4  A1D000     BCLR W0, #13
+0003A6  A1E000     BCLR W0, #14
+0003A8  A1F000     BCLR W0, #15
+0003AA  881510     MOV W0, ADCON2
+83:                    ADCON3bits.ADRC = 0; // Clock derived from system clock
+0003AC  A9E2A4     BCLR ADCON3, #7
+84:                    ADCON3bits.ADCS = 0b000011; //A/D conversion clock = 4xTCY
+0003AE  801521     MOV ADCON3, W1
+0003B0  2FFC00     MOV #0xFFC0, W0
+0003B2  608000     AND W1, W0, W0
+0003B4  B30030     IOR #0x3, W0
+0003B6  881520     MOV W0, ADCON3
+85:                    ADCON2bits.CHPS = 0b00; //using only one channel
+0003B8  801510     MOV ADCON2, W0
+0003BA  A18000     BCLR W0, #8
+0003BC  A19000     BCLR W0, #9
+0003BE  881510     MOV W0, ADCON2
+86:                    ADCON1bits.SIMSAM = 0; //multiple channels sampled sequentially
+0003C0  A962A0     BCLR ADCON1, #3
+87:                    ADCSSL = 0b0000000000000000; //A/D Input Pin Scan Selection - no scan, manual reading
+0003C2  EF22AA     CLR ADCSSL
+88:                    ADCHSbits.CH0SA = 0b0000; //Channel 0 positive input is AN0       
+0003C4  801530     MOV ADCHS, W0
+0003C6  A10000     BCLR W0, #0
+0003C8  A11000     BCLR W0, #1
+0003CA  A12000     BCLR W0, #2
+0003CC  A13000     BCLR W0, #3
+0003CE  881530     MOV W0, ADCHS
+89:                    ADCHSbits.CH0NA = 0b0; //Channel 0 negative input is VREF-     
+0003D0  A982A6     BCLR ADCHS, #4
+90:                    ADCON1bits.SSRC = 0b111; // Conversion Trigger Source - Internal counter ends sampling and starts conversion (auto convert)
+0003D2  801500     MOV ADCON1, W0
+0003D4  A05000     BSET W0, #5
+0003D6  A06000     BSET W0, #6
+0003D8  A07000     BSET W0, #7
+0003DA  881500     MOV W0, ADCON1
+91:                    ADCON1bits.ASAM = 0; //Sampling begins when SAMP bit set
+0003DC  A942A0     BCLR ADCON1, #2
+92:                    ADCON1bits.SAMP = 0; //A/D sample/hold amplifiers are holding
+0003DE  A922A0     BCLR ADCON1, #1
+93:                    //!!!! writing 1 to this bit will start sampling
+94:                    //ADCONbits.DONE - A/D Conversion Status bit Cleared by software or start of a new conversion
+95:                    ADCON3bits.SAMC = 0b00001; //??? Auto-Sample time = 1TAD
+0003E0  801521     MOV ADCON3, W1
+0003E2  2E0FF0     MOV #0xE0FF, W0
+0003E4  608080     AND W1, W0, W1
+0003E6  201000     MOV #0x100, W0
+0003E8  700001     IOR W0, W1, W0
+0003EA  881520     MOV W0, ADCON3
+96:                    ADCON1bits.FORM = 0b00; //Output format is integer (DOUT = 0000 00dd dddd dddd)
+0003EC  801500     MOV ADCON1, W0
+0003EE  A18000     BCLR W0, #8
+0003F0  A19000     BCLR W0, #9
+0003F2  881500     MOV W0, ADCON1
+97:                    ADCON1bits.ADSIDL = 0; // Continue module operation in Idle mode
+0003F4  A9A2A1     BCLR 0x2A1, #5
+98:                
+99:                    ADCON1bits.ADON = 0; // A/D converter module is operating/off
+0003F6  A9E2A1     BCLR 0x2A1, #7
+100:                   //!!!! this is another BIG SWITCH
+101:               
+102:               
+103:                   //--------------TIMERS CONFIGURATION-----------
+104:                   //-----------------Timer1----------------------
+105:                   T1CONbits.TCS = 0; //Timer Clock Source Select - Internal clock (FOSC/4)
+0003F8  A92104     BCLR T1CON, #1
+106:                   T1CONbits.TCKPS = 0b11; //Timer Input Clock Prescale (1/8/64/256) = 1:256
+0003FA  800820     MOV T1CON, W0
+0003FC  A04000     BSET W0, #4
+0003FE  A05000     BSET W0, #5
+000400  880820     MOV W0, T1CON
+107:                   T1CONbits.TSIDL = 0; //Continue timer operation in Idle mode
+000402  A9A105     BCLR 0x105, #5
+108:                   T1CONbits.TON = 1; //start the timer
+000404  A8E105     BSET 0x105, #7
+109:                   _T1IE = 1; // enable the interrupt
+000406  A8608C     BSET IEC0, #3
+110:                   _T1IP = 5; //interrupt priority
+000408  8004A0     MOV IPC0, W0
+00040A  A0C000     BSET W0, #12
+00040C  A1D000     BCLR W0, #13
+00040E  A0E000     BSET W0, #14
+000410  8804A0     MOV W0, IPC0
+111:                   //PR1 = 7812; // timer 1 period
+112:                   PR1 = 28789*2;
+000412  2E0EA0     MOV #0xE0EA, W0
+000414  880810     MOV W0, PR1
+113:                   LED = 0;
+000416  A9C2E2     BCLR LATF, #6
+114:                   
+115:                           
+116:                           
+117:                   Init_Uart1();
+000418  0700B6     RCALL Init_Uart1
+118:                   /* Initialize peripherals */
+119:               }
+00041A  FA8000     ULNK
+00041C  060000     RETURN
+120:               
+121:               
+122:               
+123:               int analogRead(int port) {
+00041E  FA0004     LNK #0x4
+000420  980710     MOV W0, [W14+2]
+124:                   int value;
+125:               
+126:                   switch (port) {
+000422  90001E     MOV [W14+2], W0
+000424  500FE2     SUB W0, #0x2, [W15]
+000426  32001A     BRA Z, 0x45C
+000428  500FE2     SUB W0, #0x2, [W15]
+00042A  3C0005     BRA GT, 0x436
+00042C  E00000     CP0 W0
+00042E  320008     BRA Z, 0x440
+000430  500FE1     SUB W0, #0x1, [W15]
+000432  32000D     BRA Z, 0x44E
+000434  370028     BRA 0x486
+000436  500FE3     SUB W0, #0x3, [W15]
+000438  320018     BRA Z, 0x46A
+00043A  500FE4     SUB W0, #0x4, [W15]
+00043C  32001D     BRA Z, 0x478
+00043E  370023     BRA 0x486
+127:                       case 0:
+128:                           ADCHSbits.CH0SA = 0x0; //Channel 0 positive input is AN0  
+000440  801530     MOV ADCHS, W0
+000442  A10000     BCLR W0, #0
+000444  A11000     BCLR W0, #1
+000446  A12000     BCLR W0, #2
+000448  A13000     BCLR W0, #3
+00044A  881530     MOV W0, ADCHS
+129:                           break;
+00044C  37001C     BRA 0x486
+130:               
+131:                       case 1:
+132:                           ADCHSbits.CH0SA = 0x1; //Channel 0 positive input is AN1  
+00044E  801530     MOV ADCHS, W0
+000450  A00000     BSET W0, #0
+000452  A11000     BCLR W0, #1
+000454  A12000     BCLR W0, #2
+000456  A13000     BCLR W0, #3
+000458  881530     MOV W0, ADCHS
+133:                           break;
+00045A  370015     BRA 0x486
+134:               
+135:                       case 2:
+136:                           ADCHSbits.CH0SA = 0x2; //Channel 0 positive input is AN2  
+00045C  801530     MOV ADCHS, W0
+00045E  A10000     BCLR W0, #0
+000460  A01000     BSET W0, #1
+000462  A12000     BCLR W0, #2
+000464  A13000     BCLR W0, #3
+000466  881530     MOV W0, ADCHS
+137:                           break;
+000468  37000E     BRA 0x486
+138:               
+139:                       case 3:
+140:                           ADCHSbits.CH0SA = 0x3; //Channel 0 positive input is AN3  
+00046A  801530     MOV ADCHS, W0
+00046C  A00000     BSET W0, #0
+00046E  A01000     BSET W0, #1
+000470  A12000     BCLR W0, #2
+000472  A13000     BCLR W0, #3
+000474  881530     MOV W0, ADCHS
+141:                           break;
+000476  370007     BRA 0x486
+142:               
+143:                       case 4:
+144:                           ADCHSbits.CH0SA = 0x4; //Channel 0 positive input is AN4  
+000478  801530     MOV ADCHS, W0
+00047A  A10000     BCLR W0, #0
+00047C  A11000     BCLR W0, #1
+00047E  A02000     BSET W0, #2
+000480  A13000     BCLR W0, #3
+000482  881530     MOV W0, ADCHS
+145:                           break;
+000484  000000     NOP
+146:               
+147:                   }
+148:               
+149:                   ADCON1bits.SAMP = 1; // start sampling  
+000486  A822A0     BSET ADCON1, #1
+150:                   // ???converting should start automatically after sampling ends as set in ADCON1bits.SSRC???
+151:                   // ??? is ADCON1bits.DONE set to zero as SAMPLING begins ?
+152:                   while (!ADCON1bits.DONE); // infinite loop that ends only when A/D conv is done    
+000488  000000     NOP
+00048A  801500     MOV ADCON1, W0
+00048C  600061     AND W0, #0x1, W0
+00048E  E00000     CP0 W0
+000490  32FFFC     BRA Z, 0x48A
+153:                   value = ADCBUF0;
+000492  801400     MOV ADCBUF0, W0
+000494  780F00     MOV W0, [W14]
+154:                   return value;
+000496  78001E     MOV [W14], W0
+155:               
+156:               
+157:               }
+000498  FA8000     ULNK
+00049A  060000     RETURN
+158:               
+159:               void Delay(uint32_t repeats) {
+00049C  FA0008     LNK #0x8
+00049E  980720     MOV W0, [W14+4]
+0004A0  980731     MOV W1, [W14+6]
+160:                   uint32_t i = 0;
+0004A2  B80060     MUL.UU W0, #0, W0
+0004A4  BE8F00     MOV.D W0, [W14]
+161:                   while (i < repeats) {
+0004A6  370004     BRA 0x4B0
+0004B0  90002E     MOV [W14+4], W0
+0004B2  9000BE     MOV [W14+6], W1
+0004B4  BE011E     MOV.D [W14], W2
+0004B6  510F80     SUB W2, W0, [W15]
+0004B8  598F81     SUBB W3, W1, [W15]
+0004BA  39FFF6     BRA NC, 0x4A8
+162:                       i++;
+0004A8  200012     MOV #0x1, W2
+0004AA  200003     MOV #0x0, W3
+0004AC  410F1E     ADD W2, [W14], [W14]
+0004AE  49975E     ADDC W3, [++W14], [W14--]
+163:                   }
+164:               }
+0004BC  FA8000     ULNK
+0004BE  060000     RETURN
+165:               
+166:               void scanPots(void)
+167:               {
+0004C0  FA0002     LNK #0x2
+168:                   int i = 0;
+0004C2  EB0000     CLR W0
+0004C4  780F00     MOV W0, [W14]
+169:                   for (i = 0; i < 5; i++)
+0004C6  EB0000     CLR W0
+0004C8  780F00     MOV W0, [W14]
+0004CA  370009     BRA 0x4DE
+0004DC  E80F1E     INC [W14], [W14]
+0004DE  78001E     MOV [W14], W0
+0004E0  500FE4     SUB W0, #0x4, [W15]
+0004E2  34FFF4     BRA LE, 0x4CC
+170:                   {
+171:                       pot[i] = analogRead(i);
+0004CC  78001E     MOV [W14], W0
+0004CE  07FFA7     RCALL analogRead
+0004D0  780080     MOV W0, W1
+0004D2  78001E     MOV [W14], W0
+0004D4  400100     ADD W0, W0, W2
+0004D6  208C40     MOV #0x8C4, W0
+0004D8  410000     ADD W2, W0, W0
+0004DA  780801     MOV W1, [W0]
+172:                   }
+173:               }
+0004E4  FA8000     ULNK
+0004E6  060000     RETURN
+174:               
+175:               long map(long x, long in_min, long in_max, long out_min, long out_max) {
+0004E8  FA0010     LNK #0x10
+0004EA  BE8F00     MOV.D W0, [W14]
+0004EC  980722     MOV W2, [W14+4]
+0004EE  980733     MOV W3, [W14+6]
+0004F0  980744     MOV W4, [W14+8]
+0004F2  980755     MOV W5, [W14+10]
+0004F4  980766     MOV W6, [W14+12]
+0004F6  980777     MOV W7, [W14+14]
+176:                   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+0004F8  90002E     MOV [W14+4], W0
+0004FA  9000BE     MOV [W14+6], W1
+0004FC  10013E     SUBR W0, [W14++], W2
+0004FE  1881AE     SUBBR W1, [W14--], W3
+000500  97BA3E     MOV [W14-10], W4
+000502  97BACE     MOV [W14-8], W5
+000504  90006E     MOV [W14+12], W0
+000506  9000FE     MOV [W14+14], W1
+000508  520000     SUB W4, W0, W0
+00050A  5A8081     SUBB W5, W1, W1
+00050C  B99A00     MUL.SS W3, W0, W4
+00050E  780204     MOV W4, W4
+000510  B98B02     MUL.SS W1, W2, W6
+000512  780286     MOV W6, W5
+000514  420205     ADD W4, W5, W4
+000516  B81000     MUL.UU W2, W0, W0
+000518  420201     ADD W4, W1, W4
+00051A  780084     MOV W4, W1
+00051C  90024E     MOV [W14+8], W4
+00051E  9002DE     MOV [W14+10], W5
+000520  90012E     MOV [W14+4], W2
+000522  9001BE     MOV [W14+6], W3
+000524  520102     SUB W4, W2, W2
+000526  5A8183     SUBB W5, W3, W3
+000528  07FE3A     RCALL ___divsi3
+00052A  BE0100     MOV.D W0, W2
+00052C  90006E     MOV [W14+12], W0
+00052E  9000FE     MOV [W14+14], W1
+000530  400002     ADD W0, W2, W0
+000532  488083     ADDC W1, W3, W1
+177:               }
+000534  FA8000     ULNK
+000536  060000     RETURN
+178:               
+179:               // runs motor on port(1-6) with speed from -100 to 100)
+180:               
+181:               void runMotor(int port, int speed) {
+000538  FA0006     LNK #0x6
+00053A  980710     MOV W0, [W14+2]
+00053C  980721     MOV W1, [W14+4]
+182:               
+183:                   int PWMtime = abs(speed);
+00053E  90002E     MOV [W14+4], W0
+000540  A7F000     BTSC W0, #15
+000542  EA0000     NEG W0, W0
+000544  780F00     MOV W0, [W14]
+184:                   switch (port) {
+185:                       case 1:
+186:               
+187:                           break;
+188:               
+189:                       case 2:
+190:               
+191:                           break;
+192:               
+193:                       case 3:
+194:               
+195:                           break;
+000546  000000     NOP
+196:               
+197:                       case 4:
+198:               
+199:                           break;
+200:               
+201:                       case 5:
+202:               
+203:                           break;
+204:               
+205:                       case 6:
+206:               
+207:                           break;
+208:                   }
+209:               }
+000548  FA8000     ULNK
+00054A  060000     RETURN
+210:               
+211:               void __attribute__((interrupt, auto_psv)) _T1Interrupt(void) {
+00054C  BE9F80     MOV.D W0, [W15++]
+00054E  781F82     MOV W2, [W15++]
+000550  F80034     PUSH PSVPAG
+000552  200000     MOV #0x0, W0
+000554  8801A0     MOV W0, PSVPAG
+000556  FA0000     LNK #0x0
+212:                   
+213:                   LED = !LED;
+000558  801711     MOV LATF, W1
+00055A  200400     MOV #0x40, W0
+00055C  608000     AND W1, W0, W0
+00055E  A7F000     BTSC W0, #15
+000560  EA0000     NEG W0, W0
+000562  E90000     DEC W0, W0
+000564  DE004F     LSR W0, #15, W0
+000566  784000     MOV.B W0, W0
+000568  FB8000     ZE W0, W0
+00056A  600061     AND W0, #0x1, W0
+00056C  DD0046     SL W0, #6, W0
+00056E  801712     MOV LATF, W2
+000570  2FFBF1     MOV #0xFFBF, W1
+000572  610081     AND W2, W1, W1
+000574  700001     IOR W0, W1, W0
+000576  881710     MOV W0, LATF
+214:                   TMR1 = 0b0000000000000000;
+000578  EF2100     CLR TMR1
+215:                   _T1IF = 0; // clear the interrupt flag
+00057A  A96084     BCLR IFS0, #3
+216:                   
+217:               }
+00057C  FA8000     ULNK
+00057E  F90034     POP PSVPAG
+000580  78014F     MOV [--W15], W2
+000582  BE004F     MOV.D [--W15], W0
+000584  064000     RETFIE
+---  C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/uart.c  --------------------------
+1:                 
+2:                 
+3:                 
+4:                 #include <xc.h>
+5:                 
+6:                 #include <stdint.h>        /* Includes uint16_t definition                    */
+7:                 #include <stdbool.h>       /* Includes true/false definition                  */
+8:                 
+9:                 #include "system.h"        /* System funct/params, like osc/peripheral config */
+10:                #include "user.h"          /* User funct/params, such as InitApp              */
+11:                #include "uart.h"
+12:                
+13:                
+14:                
+15:                
+16:                volatile char TX_Buff[UART_SIZE_BUFF] = {'f'};
+17:                volatile uint16_t i_TX_Buff = 1;
+18:                
+19:                volatile int RX_Buff[UART_SIZE_BUFF];
+20:                //volatile char RX_Buff[UART_SIZE_BUFF];
+21:                volatile uint16_t i_RX_Buff = 0;
+22:                
+23:                void Init_Uart1(void) {
+000586  FA0004     LNK #0x4
+24:                    uint32_t val32 = FCY;
+000588  21D440     MOV #0x1D44, W0
+00058A  2001C1     MOV #0x1C, W1
+00058C  BE8F00     MOV.D W0, [W14]
+25:                    U1MODEbits.ALTIO = 1; // utilisation des pina alternatives de l'uart 1
+00058E  A8420D     BSET 0x20D, #2
+26:                    U1STAbits.UTXISEL = 0; // mode d'interuption de transmit
+000590  A9E20F     BCLR 0x20F, #7
+27:                    // interrupt receive à chaque caractère
+28:                    // calcul de la valeur à mettre dans le BaudRate Generator
+29:                    // formule : BRG = (FCY/(16*Baudrate))-1
+30:                    // petit passage en * 10 pour gestion de l'arondi
+31:                
+32:                    val32 = (val32 * 10) / 16;
+000592  90001E     MOV [W14+2], W0
+000594  B9006A     MUL.SU W0, #10, W0
+000596  780100     MOV W0, W2
+000598  78001E     MOV [W14], W0
+00059A  B90060     MUL.SU W0, #0, W0
+00059C  780000     MOV W0, W0
+00059E  410100     ADD W2, W0, W2
+0005A0  78009E     MOV [W14], W1
+0005A2  2000A0     MOV #0xA, W0
+0005A4  B80800     MUL.UU W1, W0, W0
+0005A6  410101     ADD W2, W1, W2
+0005A8  780082     MOV W2, W1
+0005AA  DD094C     SL W1, #12, W2
+0005AC  DE0044     LSR W0, #4, W0
+0005AE  710000     IOR W2, W0, W0
+0005B0  DE08C4     LSR W1, #4, W1
+0005B2  BE8F00     MOV.D W0, [W14]
+33:                    val32 = val32 / UART1_BAUDRATE;
+0005B4  BE001E     MOV.D [W14], W0
+0005B6  2E1002     MOV #0xE100, W2
+0005B8  200003     MOV #0x0, W3
+0005BA  07FE00     RCALL ___udivsi3
+0005BC  BE8F00     MOV.D W0, [W14]
+34:                    if ((val32 % 10) >= 5)
+0005BE  BE001E     MOV.D [W14], W0
+0005C0  2000A2     MOV #0xA, W2
+0005C2  200003     MOV #0x0, W3
+0005C4  07FE0B     RCALL ___umodsi3
+0005C6  BE0100     MOV.D W0, W2
+0005C8  200040     MOV #0x4, W0
+0005CA  200001     MOV #0x0, W1
+0005CC  510F80     SUB W2, W0, [W15]
+0005CE  598F81     SUBB W3, W1, [W15]
+0005D0  36000C     BRA LEU, 0x5EA
+35:                        val32 = val32 + (10 - (val32 % 10));
+0005D2  BE001E     MOV.D [W14], W0
+0005D4  2000A2     MOV #0xA, W2
+0005D6  200003     MOV #0x0, W3
+0005D8  07FE01     RCALL ___umodsi3
+0005DA  10013E     SUBR W0, [W14++], W2
+0005DC  1881AE     SUBBR W1, [W14--], W3
+0005DE  BE0002     MOV.D W2, W0
+0005E0  2000A2     MOV #0xA, W2
+0005E2  200003     MOV #0x0, W3
+0005E4  401F02     ADD W0, W2, [W14++]
+0005E6  489703     ADDC W1, W3, [W14--]
+0005E8  370006     BRA 0x5F6
+36:                    else
+37:                        val32 = val32 - (val32 % 10);
+0005EA  BE001E     MOV.D [W14], W0
+0005EC  2000A2     MOV #0xA, W2
+0005EE  200003     MOV #0x0, W3
+0005F0  07FDF5     RCALL ___umodsi3
+0005F2  101F1E     SUBR W0, [W14], [W14++]
+0005F4  18971E     SUBBR W1, [W14], [W14--]
+38:                
+39:                    val32 = (val32 / 10) - 1;
+0005F6  BE001E     MOV.D [W14], W0
+0005F8  2000A2     MOV #0xA, W2
+0005FA  200003     MOV #0x0, W3
+0005FC  07FDDF     RCALL ___udivsi3
+0005FE  EB8100     SETM W2
+000600  EB8180     SETM W3
+000602  401F02     ADD W0, W2, [W14++]
+000604  489703     ADDC W1, W3, [W14--]
+40:                
+41:                    U1BRG = val32;
+000606  78001E     MOV [W14], W0
+000608  8810A0     MOV W0, U1BRG
+42:                
+43:                    IFS0bits.U1RXIF = 0; // clear les flags
+00060A  A92085     BCLR 0x85, #1
+44:                    IFS0bits.U1TXIF = 0;
+00060C  A94085     BCLR 0x85, #2
+45:                
+46:                    IPC2bits.U1RXIP = 7; // faut réagir dès que l'on a reçu un truc
+00060E  8004C0     MOV IPC2, W0
+000610  A04000     BSET W0, #4
+000612  A05000     BSET W0, #5
+000614  A06000     BSET W0, #6
+000616  8804C0     MOV W0, IPC2
+47:                    IPC2bits.U1TXIP = 2; // mais on peut attendre un peu avant la prochaine transmission
+000618  8004C0     MOV IPC2, W0
+00061A  A18000     BCLR W0, #8
+00061C  A09000     BSET W0, #9
+00061E  A1A000     BCLR W0, #10
+000620  8804C0     MOV W0, IPC2
+48:                
+49:                    U1MODEbits.UARTEN = 1;
+000622  A8E20D     BSET 0x20D, #7
+50:                    U1STAbits.UTXEN = 1; // allow transmit
+000624  A8420F     BSET 0x20F, #2
+51:                    IEC0bits.U1RXIE = 1;
+000626  A8208D     BSET 0x8D, #1
+52:                    IEC0bits.U1TXIE = 1;
+000628  A8408D     BSET 0x8D, #2
+53:                
+54:                    Delay(10);
+00062A  2000A0     MOV #0xA, W0
+00062C  200001     MOV #0x0, W1
+00062E  07FF36     RCALL Delay
+55:                
+56:                    U1TXREG = 's';
+000630  200730     MOV #0x73, W0
+000632  881080     MOV W0, U1TXREG
+57:                
+58:                
+59:                
+60:                }
+000634  FA8000     ULNK
+000636  060000     RETURN
+61:                
+62:                void __attribute__((interrupt, auto_psv)) _U1TXInterrupt(void) {
+000638  BE9F80     MOV.D W0, [W15++]
+00063A  F80034     PUSH PSVPAG
+00063C  200000     MOV #0x0, W0
+00063E  8801A0     MOV W0, PSVPAG
+000640  FA0000     LNK #0x0
+63:                    static uint16_t i_TX_Transmit = 0;
+64:                
+65:                    IFS0bits.U1TXIF = 0;
+000642  A94085     BCLR 0x85, #2
+66:                    U1TXREG = TX_Buff[i_TX_Transmit];
+000644  8045C1     MOV i_TX_Transmit, W1
+000646  209300     MOV #0x930, W0
+000648  408000     ADD W1, W0, W0
+00064A  784010     MOV.B [W0], W0
+00064C  FB0000     SE W0, W0
+00064E  881080     MOV W0, U1TXREG
+67:                    i_TX_Transmit++;
+000650  8045C0     MOV i_TX_Transmit, W0
+000652  E80000     INC W0, W0
+000654  8845C0     MOV W0, i_TX_Transmit
+68:                    if (i_TX_Transmit == UART_SIZE_BUFF)
+000656  8045C1     MOV i_TX_Transmit, W1
+000658  200320     MOV #0x32, W0
+00065A  508F80     SUB W1, W0, [W15]
+00065C  3A0001     BRA NZ, 0x660
+69:                        i_TX_Transmit = 0;
+00065E  EF28B8     CLR i_TX_Transmit
+70:                
+71:                    if (i_TX_Transmit == i_TX_Buff) // si on a tout transmit, on s'arrete
+000660  8045C1     MOV i_TX_Transmit, W1
+000662  804B10     MOV 0x962, W0
+000664  508F80     SUB W1, W0, [W15]
+000666  3A0001     BRA NZ, 0x66A
+72:                        IEC0bits.U1TXIE = 0;
+000668  A9408D     BCLR 0x8D, #2
+73:                
+74:                }
+00066A  FA8000     ULNK
+00066C  F90034     POP PSVPAG
+00066E  BE004F     MOV.D [--W15], W0
+000670  064000     RETFIE
+75:                
+76:                void __attribute__((interrupt, auto_psv)) _U1RXInterrupt(void) {
+000672  BE9F80     MOV.D W0, [W15++]
+000674  781F82     MOV W2, [W15++]
+000676  F80034     PUSH PSVPAG
+000678  200000     MOV #0x0, W0
+00067A  8801A0     MOV W0, PSVPAG
+00067C  FA0000     LNK #0x0
+77:                    RX_Buff[i_RX_Buff] = U1RXREG;
+00067E  8045A0     MOV i_RX_Buff, W0
+000680  801091     MOV U1RXREG, W1
+000682  400100     ADD W0, W0, W2
+000684  208500     MOV #0x850, W0
+000686  410000     ADD W2, W0, W0
+000688  780801     MOV W1, [W0]
+78:                    i_RX_Buff++;
+00068A  8045A0     MOV i_RX_Buff, W0
+00068C  E80000     INC W0, W0
+00068E  8845A0     MOV W0, i_RX_Buff
+79:                    if (i_RX_Buff == UART_SIZE_BUFF)
+000690  8045A1     MOV i_RX_Buff, W1
+000692  200320     MOV #0x32, W0
+000694  508F80     SUB W1, W0, [W15]
+000696  3A0001     BRA NZ, 0x69A
+80:                        i_RX_Buff = 0;
+000698  EF28B4     CLR i_RX_Buff
+81:                    IFS0bits.U1RXIF = 0;
+00069A  A92085     BCLR 0x85, #1
+82:                }
+00069C  FA8000     ULNK
+00069E  F90034     POP PSVPAG
+0006A0  78014F     MOV [--W15], W2
+0006A2  BE004F     MOV.D [--W15], W0
+0006A4  064000     RETFIE
+83:                
+84:                void Transmit_String(char *str) // lets send "abc"
+85:                {
+0006A6  FA0008     LNK #0x8
+0006A8  980730     MOV W0, [W14+6]
+86:                    uint16_t i = i_TX_Buff; //1
+0006AA  804B11     MOV 0x962, W1
+0006AC  780F01     MOV W1, [W14]
+87:                    char c;
+88:                    uint16_t must_send = 0;
+0006AE  EB0000     CLR W0
+0006B0  980720     MOV W0, [W14+4]
+89:                    c = *str; //placing here address of the first character in string ("a"))
+0006B2  90003E     MOV [W14+6], W0
+0006B4  784090     MOV.B [W0], W1
+0006B6  984721     MOV.B W1, [W14+2]
+90:                
+91:                    while (c != 0) // while we're not reached the end of the string
+0006B8  370013     BRA 0x6E0
+0006E0  90402E     MOV.B [W14+2], W0
+0006E2  E00400     CP0.B W0
+0006E4  3AFFEA     BRA NZ, 0x6BA
+92:                    {
+93:                        TX_Buff[i] = c; // 1)place char in buffer [1] 
+0006BA  209300     MOV #0x930, W0
+0006BC  40001E     ADD W0, [W14], W0
+0006BE  9040AE     MOV.B [W14+2], W1
+0006C0  784801     MOV.B W1, [W0]
+94:                        i++; //i=2
+0006C2  E80F1E     INC [W14], [W14]
+95:                        if (i == UART_SIZE_BUFF)// if we reached end of the buffer
+0006C4  200320     MOV #0x32, W0
+0006C6  78009E     MOV [W14], W1
+0006C8  508F80     SUB W1, W0, [W15]
+0006CA  3A0002     BRA NZ, 0x6D0
+96:                            i = 0; // write to bottom of buffer
+0006CC  EB0000     CLR W0
+0006CE  780F00     MOV W0, [W14]
+97:                        str++; // going to next character 
+0006D0  90003E     MOV [W14+6], W0
+0006D2  E80000     INC W0, W0
+0006D4  980730     MOV W0, [W14+6]
+98:                        c = *str;
+0006D6  90003E     MOV [W14+6], W0
+0006D8  784090     MOV.B [W0], W1
+0006DA  984721     MOV.B W1, [W14+2]
+99:                        must_send = 1;
+0006DC  200010     MOV #0x1, W0
+0006DE  980720     MOV W0, [W14+4]
+100:                   }
+101:                   if (must_send) {
+0006E6  90002E     MOV [W14+4], W0
+0006E8  E00000     CP0 W0
+0006EA  320003     BRA Z, 0x6F2
+102:                       i_TX_Buff = i;
+0006EC  78009E     MOV [W14], W1
+0006EE  884B11     MOV W1, 0x962
+103:                       IEC0bits.U1TXIE = 1; // enabling TX interrupts (calling for transmission))
+0006F0  A8408D     BSET 0x8D, #2
+104:                   }
+105:               }
+0006F2  FA8000     ULNK
+0006F4  060000     RETURN
+106:               
+107:               void Transmit_Char(char *symbol) {
+0006F6  FA0004     LNK #0x4
+0006F8  980710     MOV W0, [W14+2]
+108:               
+109:                   uint8_t i = i_TX_Buff;
+0006FA  804B10     MOV 0x962, W0
+0006FC  784F00     MOV.B W0, [W14]
+110:                   if (*symbol) {
+0006FE  90001E     MOV [W14+2], W0
+000700  784010     MOV.B [W0], W0
+000702  E00400     CP0.B W0
+000704  320010     BRA Z, 0x726
+111:                       TX_Buff[i] = *symbol;
+000706  FB811E     ZE [W14], W2
+000708  90001E     MOV [W14+2], W0
+00070A  784090     MOV.B [W0], W1
+00070C  209300     MOV #0x930, W0
+00070E  410000     ADD W2, W0, W0
+000710  784801     MOV.B W1, [W0]
+112:                       i++;
+000712  E84F1E     INC.B [W14], [W14]
+113:                       if (i == UART_SIZE_BUFF) {
+000714  B3C320     MOV.B #0x32, W0
+000716  78409E     MOV.B [W14], W1
+000718  50CF80     SUB.B W1, W0, [W15]
+00071A  3A0002     BRA NZ, 0x720
+114:                           i = 0;
+00071C  EB4000     CLR.B W0
+00071E  784F00     MOV.B W0, [W14]
+115:                       }
+116:                       i_TX_Buff = i;
+000720  FB801E     ZE [W14], W0
+000722  884B10     MOV W0, 0x962
+117:                       IEC0bits.U1TXIE = 1;
+000724  A8408D     BSET 0x8D, #2
+118:                   }
+119:               }
+000726  FA8000     ULNK
+000728  060000     RETURN
+120:               
+121:               
+122:               //uint8_t Get_Uart(char *c) {
+123:               //    static uint16_t i_RX = 0;
+124:               //
+125:               //    if (i_RX != i_RX_Buff) { // si il y a qq chose dans le buffer
+126:               //        *c = RX_Buff[i_RX];
+127:               //        i_RX++;
+128:               //        if (i_RX == UART_SIZE_BUFF)
+129:               //            i_RX = 0;
+130:               //        return 1;
+131:               //    } else {
+132:               //        return 0;
+133:               //    }
+134:               //}
+135:               uint16_t Get_Uart(char *c) {
+00072A  FA0002     LNK #0x2
+00072C  780F00     MOV W0, [W14]
+136:                   static uint16_t i_RX = 0;
+137:               
+138:                   if (i_RX != i_RX_Buff) { // si il y a qq chose dans le buffer
+00072E  8045B1     MOV i_RX, W1
+000730  8045A0     MOV i_RX_Buff, W0
+000732  508F80     SUB W1, W0, [W15]
+000734  320012     BRA Z, 0x75A
+139:                       *c = RX_Buff[i_RX];
+000736  8045B0     MOV i_RX, W0
+000738  400080     ADD W0, W0, W1
+00073A  208500     MOV #0x850, W0
+00073C  408000     ADD W1, W0, W0
+00073E  780010     MOV [W0], W0
+000740  784080     MOV.B W0, W1
+000742  78001E     MOV [W14], W0
+000744  784801     MOV.B W1, [W0]
+140:                       i_RX++;
+000746  8045B0     MOV i_RX, W0
+000748  E80000     INC W0, W0
+00074A  8845B0     MOV W0, i_RX
+141:                       if (i_RX == UART_SIZE_BUFF)
+00074C  8045B1     MOV i_RX, W1
+00074E  200320     MOV #0x32, W0
+000750  508F80     SUB W1, W0, [W15]
+000752  3A0001     BRA NZ, 0x756
+142:                           i_RX = 0;
+000754  EF28B6     CLR i_RX
+143:                       return 1;
+000756  200010     MOV #0x1, W0
+000758  370001     BRA 0x75C
+144:                   } else {
+145:                       return 0;
+00075A  EB0000     CLR W0
+146:                   }
+147:               }
+00075C  FA8000     ULNK
+00075E  060000     RETURN
+148:               
+---  C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/system.c  ------------------------
+1:                 /******************************************************************************/
+2:                 /* Files to Include                                                           */
+3:                 /******************************************************************************/
+4:                 
+5:                 /* Device header file */
+6:                 #if defined(__XC16__)
+7:                     #include <xc.h>
+8:                 #elif defined(__C30__)
+9:                     #if defined(__dsPIC30F__)
+10:                        #include <p30Fxxxx.h>
+11:                    #endif
+12:                #endif
+13:                
+14:                #include <stdint.h>          /* For uint32_t definition                       */
+15:                #include <stdbool.h>         /* For true/false definition                     */
+16:                
+17:                #include "system.h"          /* variables/params used by system.c             */
+18:                
+19:                /******************************************************************************/
+20:                /* System Level Functions                                                     */
+21:                /*                                                                            */
+22:                /* Custom oscillator configuration funtions, reset source evaluation          */
+23:                /* functions, and other non-peripheral microcontroller initialization         */
+24:                /* functions get placed in system.c                                           */
+25:                /*                                                                            */
+26:                /******************************************************************************/
+27:                
+28:                /* Refer to the device Family Reference Manual Oscillator section for
+29:                information about available oscillator configurations.  Typically
+30:                this would involve configuring the oscillator tuning register or clock
+31:                switching useing the compiler's __builtin_write_OSCCON functions.
+32:                Refer to the C Compiler for PIC24F MCUs and dsPIC DSCs User Guide in the
+33:                compiler installation directory /doc folder for documentation on the
+34:                __builtin functions.  Refer to the XC16 C Compiler User's Guide appendix G
+35:                 for a list of the XC16 compiler __builtin functions */
+36:                
+37:                /* TODO Add clock switching code if appropriate.  An example stub is below.   */
+38:                void ConfigureOscillator(void)
+39:                {
+00091C  FA0000     LNK #0x0
+40:                #if 0
+41:                        /* Disable Watch Dog Timer */
+42:                        RCONbits.SWDTEN = 0;
+43:                
+44:                        /* When clock switch occurs switch to Pri Osc controlled by FPR<4:0> */
+45:                        __builtin_write_OSCCONH(0x03);  /* Set OSCCONH for clock switch */
+46:                        __builtin_write_OSCCONL(0x01);  /* Start clock switching */
+47:                        while(OSCCONbits.COSC != 0b011);
+48:                
+49:                        /* Wait for Clock switch to occur */
+50:                        /* Wait for PLL to lock, if PLL is used */
+51:                        /* while(OSCCONbits.LOCK != 1); */
+52:                #endif
+53:                
+54:                }
+00091E  FA8000     ULNK
+000920  060000     RETURN
+55:                
+---  C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/main.c  --------------------------
+1:                 /******************************************************************************/
+2:                 /* Files to Include                                                           */
+3:                 /******************************************************************************/
+4:                 
+5:                 /* Device header file */
+6:                 
+7:                 
+8:                 
+9:                 
+10:                #include <stdint.h>        /* Includes uint16_t definition                    */
+11:                #include <stdbool.h>       /* Includes true/false definition                  */
+12:                #include <stdlib.h>   
+13:                #include <stdio.h>  
+14:                #include <string.h> 
+15:                
+16:                #include "system.h"        /* System funct/params, like osc/peripheral config */
+17:                #include "user.h"          /* User funct/params, such as InitApp              */
+18:                
+19:                #include <libpic30.h>       //_delay_ms and other stuff
+20:                #include <math.h>       //_delay_ms and other stuff
+21:                
+22:                #include "comm.h"
+23:                
+24:                
+25:                #if defined(__XC16__)
+26:                #include <xc.h>
+27:                #elif defined(__C30__)
+28:                #if defined(__dsPIC30F__)
+29:                #include <p30F4011.h>
+30:                #endif
+31:                #endif
+32:                
+33:                #include "uart.h"
+34:                
+35:                /******************************************************************************/
+36:                /* Global Variable Declaration                                                */
+37:                /******************************************************************************/
+38:                
+39:                volatile int coordinates [5] = {0, 0, 0, 0, 0};
+40:                volatile int pot [5] = {0, 0, 0, 0, 0};
+41:                
+42:                int pot0max = 798;
+43:                int pot0min = 230;
+44:                
+45:                int pot1max = 380;
+46:                int pot1min = 230;
+47:                
+48:                // 0 : 0/360/644 : Z axis 230/511/798
+49:                // 1 : 385/217
+50:                // 2 : 579/350
+51:                // 3 : 0/400   400 = 360deg
+52:                // 4 : 
+53:                int c1, c2, c3, c4, c5 = 0;
+54:                
+55:                char buffer[30];
+56:                int coordMassivePointer = 0;
+57:                
+58:                /******************************************************************************/
+59:                /* Main Program                                                               */
+60:                
+61:                /******************************************************************************/
+62:                
+63:                int16_t main(void) {
+0008BE  FA0000     LNK #0x0
+64:                    int i;
+65:                    /* Configure the oscillator for the device */
+66:                    ConfigureOscillator();
+0008C0  07002D     RCALL ConfigureOscillator
+67:                
+68:                    /* Initialize IO ports and peripherals */
+69:                    InitApp();
+0008C2  07FD4E     RCALL InitApp
+70:                    // Init_Uart1();
+71:                
+72:                    ADCON1bits.ADON = 1; // turn on ADC here
+0008C4  A8E2A1     BSET 0x2A1, #7
+73:                    while (1) {
+74:                        //        PDC1 = 0;
+75:                        //  receiveCommand();
+76:                
+77:                       scanPots();
+0008C6  07FDFC     RCALL scanPots
+78:                       
+79:                       PTCONbits.PTEN = 0;
+0008C8  A9E1C1     BCLR 0x1C1, #7
+80:                       PDC1 = 0;
+0008CA  EF21D6     CLR PDC1
+81:                       PDC2 = 500;
+0008CC  201F40     MOV #0x1F4, W0
+0008CE  880EC0     MOV W0, PDC2
+82:                       
+83:                       
+84:                       if ((pot[0])>pot0max) directionPin1 = 0;
+0008D0  804621     MOV pot, W1
+0008D2  804B20     MOV 0x964, W0
+0008D4  508F80     SUB W1, W0, [W15]
+0008D6  340001     BRA LE, 0x8DA
+0008D8  A9C2CA     BCLR LATB, #6
+85:                       if ((pot[0])<pot0min) directionPin1 = 1;
+0008DA  804621     MOV pot, W1
+0008DC  804B30     MOV 0x966, W0
+0008DE  508F80     SUB W1, W0, [W15]
+0008E0  3D0001     BRA GE, 0x8E4
+0008E2  A8C2CA     BSET LATB, #6
+86:                       
+87:                       if ((pot[1])>pot1max) directionPin1 = 1;
+0008E4  804631     MOV 0x8C6, W1
+0008E6  804B40     MOV 0x968, W0
+0008E8  508F80     SUB W1, W0, [W15]
+0008EA  340001     BRA LE, 0x8EE
+0008EC  A8C2CA     BSET LATB, #6
+88:                       if ((pot[1])<pot1min) directionPin1 = 0;
+0008EE  804631     MOV 0x8C6, W1
+0008F0  804B50     MOV 0x96A, W0
+0008F2  508F80     SUB W1, W0, [W15]
+0008F4  3D0001     BRA GE, 0x8F8
+0008F6  A9C2CA     BCLR LATB, #6
+89:                       
+90:                //        
+91:                //        for (i = 0; i<5; i++) {
+92:                //            sprintf (&buffer[0], "%d: %d\r\n", i, pot[i]);
+93:                //            __delay_ms (10);
+94:                //            Transmit_String(&buffer[0]);
+95:                //            __delay_ms (20);
+96:                //        }
+97:                       __delay_ms(1000);
+0008F8  21D440     MOV #0x1D44, W0
+0008FA  2001C1     MOV #0x1C, W1
+0008FC  070001     RCALL ___delay32
+98:                //        LED = !LED;
+99:                
+100:                   }
+0008FE  37FFE3     BRA 0x8C6
+101:               }
+---  C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/comm.c  --------------------------
+1:                 #include <stdint.h>
+2:                 #include <stdio.h>
+3:                 #include <stdlib.h>
+4:                 #include "uart.h"
+5:                 #include "comm.h"
+6:                 
+7:                 extern volatile int coordinates[];
+8:                 
+9:                 char tempBuf[50];
+10:                int bufIndx = 0;
+11:                int state = 0; // 0 - waiting for $, 1 - receiving smth interesting
+12:                
+13:                int temp;
+14:                
+15:                void receiveCommand(void) {
+000760  FA0002     LNK #0x2
+16:                    char c;
+17:                    if (Get_Uart(&c)) {
+000762  78000E     MOV W14, W0
+000764  07FFE2     RCALL Get_Uart
+000766  E00000     CP0 W0
+000768  32001C     BRA Z, 0x7A2
+18:                        if (c == '$' && state == 0) {//if there is a beginning of command
+00076A  78409E     MOV.B [W14], W1
+00076C  B3C240     MOV.B #0x24, W0
+00076E  50CF80     SUB.B W1, W0, [W15]
+000770  3A0007     BRA NZ, 0x780
+000772  804960     MOV state, W0
+000774  E00000     CP0 W0
+000776  3A0004     BRA NZ, 0x780
+19:                            state = 1; // listening interesting things
+000778  200010     MOV #0x1, W0
+00077A  884960     MOV W0, state
+20:                            bufIndx = 0;
+00077C  EF292A     CLR bufIndx
+00077E  370011     BRA 0x7A2
+21:                        }
+22:                        else if (state == 1) {
+000780  804960     MOV state, W0
+000782  500FE1     SUB W0, #0x1, [W15]
+000784  3A000E     BRA NZ, 0x7A2
+23:                            tempBuf[bufIndx] = c;
+000786  804952     MOV bufIndx, W2
+000788  78409E     MOV.B [W14], W1
+00078A  208F80     MOV #0x8F8, W0
+00078C  410000     ADD W2, W0, W0
+00078E  784801     MOV.B W1, [W0]
+24:                            bufIndx++;
+000790  804950     MOV bufIndx, W0
+000792  E80000     INC W0, W0
+000794  884950     MOV W0, bufIndx
+25:                            if (c == ';') {
+000796  78409E     MOV.B [W14], W1
+000798  B3C3B0     MOV.B #0x3B, W0
+00079A  50CF80     SUB.B W1, W0, [W15]
+00079C  3A0002     BRA NZ, 0x7A2
+26:                                state = 0; //command completed
+00079E  EF292C     CLR state
+27:                                analyzeCommand();
+0007A0  070002     RCALL analyzeCommand
+28:                            }
+29:                        }
+30:                
+31:                    }
+32:                }
+0007A2  FA8000     ULNK
+0007A4  060000     RETURN
+33:                
+34:                void analyzeCommand(void) {
+0007A6  FA0002     LNK #0x2
+35:                    int cursor = 0;
+0007A8  EB0000     CLR W0
+0007AA  780F00     MOV W0, [W14]
+36:                
+37:                    while (tempBuf[cursor] != ';') {
+0007AC  370001     BRA 0x7B0
+0007B0  208F80     MOV #0x8F8, W0
+0007B2  40001E     ADD W0, [W14], W0
+0007B4  784090     MOV.B [W0], W1
+0007B6  B3C3B0     MOV.B #0x3B, W0
+0007B8  50CF80     SUB.B W1, W0, [W15]
+0007BA  3AFFF9     BRA NZ, 0x7AE
+38:                        cursor++;
+0007AE  E80F1E     INC [W14], [W14]
+39:                    }
+40:                
+41:                    tempBuf[cursor] = '\0';
+0007BC  208F80     MOV #0x8F8, W0
+0007BE  40001E     ADD W0, [W14], W0
+0007C0  EB4080     CLR.B W1
+0007C2  784801     MOV.B W1, [W0]
+42:                
+43:                    if (tempBuf[0] == 'x') {
+0007C4  208F81     MOV #0x8F8, W1
+0007C6  784091     MOV.B [W1], W1
+0007C8  B3C780     MOV.B #0x78, W0
+0007CA  50CF80     SUB.B W1, W0, [W15]
+0007CC  3A0006     BRA NZ, 0x7DA
+44:                        coordinates[0] = atoi(&tempBuf[2]);
+0007CE  2000A2     MOV #0xA, W2
+0007D0  EB0080     CLR W1
+0007D2  208FA0     MOV #0x8FA, W0
+0007D4  07FD06     RCALL __Stoul
+0007D6  780000     MOV W0, W0
+0007D8  8845D0     MOV W0, coordinates
+45:                       //  coordinates[0] = atoi("444");
+46:                        
+47:                    }
+48:                
+49:                    if (tempBuf[0] == 'y') {
+0007DA  208F81     MOV #0x8F8, W1
+0007DC  784091     MOV.B [W1], W1
+0007DE  B3C790     MOV.B #0x79, W0
+0007E0  50CF80     SUB.B W1, W0, [W15]
+0007E2  3A0006     BRA NZ, 0x7F0
+50:                        coordinates[1] = atoi(&tempBuf[2]);
+0007E4  2000A2     MOV #0xA, W2
+0007E6  EB0080     CLR W1
+0007E8  208FA0     MOV #0x8FA, W0
+0007EA  07FCFB     RCALL __Stoul
+0007EC  780000     MOV W0, W0
+0007EE  8845E0     MOV W0, 0x8BC
+51:                    }
+52:                
+53:                    if (tempBuf[0] == 'z') {
+0007F0  208F81     MOV #0x8F8, W1
+0007F2  784091     MOV.B [W1], W1
+0007F4  B3C7A0     MOV.B #0x7A, W0
+0007F6  50CF80     SUB.B W1, W0, [W15]
+0007F8  3A0006     BRA NZ, 0x806
+54:                        coordinates[2] = atoi(&tempBuf[2]);
+0007FA  2000A2     MOV #0xA, W2
+0007FC  EB0080     CLR W1
+0007FE  208FA0     MOV #0x8FA, W0
+000800  07FCF0     RCALL __Stoul
+000802  780000     MOV W0, W0
+000804  8845F0     MOV W0, 0x8BE
+55:                    }
+56:                
+57:                    if (tempBuf[0] == 'v') {
+000806  208F81     MOV #0x8F8, W1
+000808  784091     MOV.B [W1], W1
+00080A  B3C760     MOV.B #0x76, W0
+00080C  50CF80     SUB.B W1, W0, [W15]
+00080E  3A0006     BRA NZ, 0x81C
+58:                        coordinates[3] = atoi(&tempBuf[2]);
+000810  2000A2     MOV #0xA, W2
+000812  EB0080     CLR W1
+000814  208FA0     MOV #0x8FA, W0
+000816  07FCE5     RCALL __Stoul
+000818  780000     MOV W0, W0
+00081A  884600     MOV W0, 0x8C0
+59:                    }
+60:                
+61:                    if (tempBuf[0] == 'w') {
+00081C  208F81     MOV #0x8F8, W1
+00081E  784091     MOV.B [W1], W1
+000820  B3C770     MOV.B #0x77, W0
+000822  50CF80     SUB.B W1, W0, [W15]
+000824  3A0006     BRA NZ, 0x832
+62:                        coordinates[4] = atoi(&tempBuf[2]);
+000826  2000A2     MOV #0xA, W2
+000828  EB0080     CLR W1
+00082A  208FA0     MOV #0x8FA, W0
+00082C  07FCDA     RCALL __Stoul
+00082E  780000     MOV W0, W0
+000830  884610     MOV W0, 0x8C2
+63:                    }
+64:                
+65:                
+66:                }
+000832  FA8000     ULNK
+000834  060000     RETURN

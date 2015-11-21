@@ -29,4 +29,7 @@
 /******************************************************************************/
 
 /* TODO Fill in your configuration bits from the config bits generator here.  */
+#pragma config FPR = FRC_PLL8           // Primary Oscillator Mode (FRC w/ PLL 4x)
+//#pragma config FOS = FRC                // Oscillator Source (Internal Fast RC)
+#pragma config FOS = PRI                // Oscillator Source pll
 #pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
