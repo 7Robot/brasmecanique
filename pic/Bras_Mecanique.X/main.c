@@ -44,6 +44,8 @@ volatile int pot [5] = {0, 0, 0, 0, 0};
 extern int pot0max;
 extern int pot0min;
 extern int pot0center;
+extern volatile int actualAngle[];
+extern volatile int servoAngle[];
 
 // 0 : 0/360/644 : Z axis 230/511/798
 // 1 : 385/217
@@ -60,11 +62,11 @@ int coordMassivePointer = 0;
 
 /******************************************************************************/
 void stopmotor(void) {
-    
+
     PDC1 = 0;
-PWMCON1bits.PEN1H = 0;
-//setup LED pin
-   
+    PWMCON1bits.PEN1H = 0;
+    //setup LED pin
+
 }
 
 int16_t main(void) {
@@ -74,45 +76,43 @@ int16_t main(void) {
 
     /* Initialize IO ports and peripherals */
     InitApp();
-    // Init_Uart1();
-
-    ADCON1bits.ADON = 1; // turn on ADC here
-
   
-    
-   calibrate(0);
-   
-       sprintf (&buffer[0], "min:%d\r\n", pot0min);
-        Transmit_String (&buffer[0]); 
-        
-         sprintf (&buffer[0], "max:%d\r\n", pot0max);
-        Transmit_String (&buffer[0]); 
-        
-  sprintf (&buffer[0], "center:%d\r\n", pot0center);
-        Transmit_String (&buffer[0]); 
-    
+
+  //   calibrate(1);
+ 
+ 
     while (1) {
         //        PDC1 = 0;
-        //  receiveCommand();
-        scanPots();
-     
+         receiveCommand();
+         
+
+//        servoAngle[0] = 180;
+//         __delay_ms(4000);
+//        servoAngle[0] = 90;
+//         __delay_ms(4000);
+//         servoAngle[0] = 270;
+//         __delay_ms(4000);
+//        setServo(0, 180);
+//        __delay_ms(4000);
+//        setServo(0, 160);
+//        __delay_ms(4000);
+//        setServo(0, 180);
+//        __delay_ms(4000);
         
-   
-       
-
-
- sprintf (&buffer[0], "pot0:%d\r\n", pot[0]);
-        Transmit_String (&buffer[0]); 
-                
-//                for (i = 0; i<5; i++) {
-//        
-//                    sprintf (&buffer[0], "%d: %d\r\n", i, pot[0]);
-//                    __delay_ms (10);
-//                    Transmit_String(&buffer[0]);
-//                    __delay_ms (20);
-//                }
-               __delay_ms(2000);
-                LED = !LED;
+//Transmit_String("==================\r\n");
+//     __delay_ms(10);
+//        for (i = 0; i < 5; i++) {
+//
+//            sprintf(&buffer[0], "%d: %d, %d\r\n", i, pot[i], actualAngle[i]);
+//            __delay_ms(10);
+//            Transmit_String(&buffer[0]);
+//            __delay_ms(20);
+//        }
+//
+//__delay_ms(200);
+       // LED = !LED;
+ 
+    
 
     }
 }

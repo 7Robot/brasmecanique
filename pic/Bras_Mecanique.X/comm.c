@@ -5,6 +5,8 @@
 #include "comm.h"
 
 extern volatile int coordinates[];
+extern volatile int actualAngle[];
+extern volatile int servoAngle[];
 
 char tempBuf[50];
 int bufIndx = 0;
@@ -27,8 +29,9 @@ void receiveCommand(void) {
                 analyzeCommand();
             }
         }
-
+        
     }
+    
 }
 
 void analyzeCommand(void) {
@@ -41,26 +44,42 @@ void analyzeCommand(void) {
     tempBuf[cursor] = '\0';
 
     if (tempBuf[0] == 'x') {
-        coordinates[0] = atoi(&tempBuf[2]);
-       //  coordinates[0] = atoi("444");
+        servoAngle[0] = atoi(&tempBuf[2]); 
         
     }
 
     if (tempBuf[0] == 'y') {
-        coordinates[1] = atoi(&tempBuf[2]);
+        servoAngle[1] = atoi(&tempBuf[2]);
     }
 
     if (tempBuf[0] == 'z') {
-        coordinates[2] = atoi(&tempBuf[2]);
+        servoAngle[2] = atoi(&tempBuf[2]);
     }
 
     if (tempBuf[0] == 'v') {
-        coordinates[3] = atoi(&tempBuf[2]);
+        servoAngle[3] = atoi(&tempBuf[2]);
     }
 
     if (tempBuf[0] == 'w') {
-        coordinates[4] = atoi(&tempBuf[2]);
+        servoAngle[4] = atoi(&tempBuf[2]);
     }
 
+sendCurrentAngles();
+}
 
+void sendCurrentAngles(void)
+{
+Transmit_String("pot===angle===set==\r\n");
+     __delay_ms(10);
+     int i;
+        for (i = 0; i < 5; i++) {
+
+            sprintf(&buffer[0], "%d: %d, %d,  %d\r\n", i, pot[i], actualAngle[i], servoAngle[i]);
+            __delay_ms(2);
+            Transmit_String(&buffer[0]);
+            __delay_ms(2);
+        }
+
+__delay_ms(200);
+    
 }

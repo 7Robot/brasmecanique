@@ -64,7 +64,8 @@
 void InitApp(void); /* I/O and Peripheral Initialization */
 
 int analogRead(int port);
-
+int max3 (int v0, int v1, int v2);
+void initialScanPots (void);
 void scanPots (void);
 
 void Delay(uint32_t repeats);
@@ -74,5 +75,6 @@ long map(long x, long in_min, long in_max, long out_min, long out_max);
 
 // runs motor on port(1-6) with speed from -100 to 100)
 void runMotor(int port, int speed, bool direction);
+void setServo (int axis, int angle);
 
 void calibrate (int axis);
