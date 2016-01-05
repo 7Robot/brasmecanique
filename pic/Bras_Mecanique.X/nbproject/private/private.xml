@@ -5,14 +5,12 @@
         <group>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/system.h</file>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/user.c</file>
-            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/comm.h</file>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/main.c</file>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/user.h</file>
-            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/uart.c</file>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/interrupts.c</file>
-            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/uart.h</file>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/configuration_bits.c</file>
             <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/comm.c</file>
+            <file>file:/C:/Users/ster/Documents/GitHub/brasmecanique/pic/Bras_Mecanique.X/system.c</file>
         </group>
     </open-files>
 </project-private>

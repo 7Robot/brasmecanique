@@ -77,9 +77,16 @@ int16_t main(void) {
     /* Initialize IO ports and peripherals */
     InitApp();
   
-
-  //   calibrate(1);
- 
+//if (courseEndPin != 0) { // if robot is turned on with at least one axis in limit position, skip the calibration and use default values
+//    calibrate(0);
+//    calibrate(1); 
+//    calibrate(2);
+//   
+//}
+    
+    servoAngle[0] = 180;
+    servoAngle[1] = 0;
+    servoAngle[2] = 0;
  
     while (1) {
         //        PDC1 = 0;
