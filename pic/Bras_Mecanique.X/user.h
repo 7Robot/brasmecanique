@@ -2,6 +2,13 @@
 /* User Level #define Macros                                                  */
 /******************************************************************************/
 #define LED LATFbits.LATF6
+//PINs at bunus interface
+#define pin1 PORTFbits.RF0
+#define pin1mode TRISFbits.TRISF0
+#define pin2 PORTFbits.RF1
+#define pin2mode TRISFbits.TRISF1
+#define pin3 PORTDbits.RD2
+#define pin3mode TRISDbits.TRISD2
 
 //Direcrion pins mode
 #define directionPin0mode TRISBbits.TRISB6
@@ -47,11 +54,22 @@
 //H-bridges Thermal protection pin
 #define thermalPin PORTBbits.RB5
 
+#define valveControlPinMode TRISDbits.TRISD3
+#define valveControlPin LATDbits.LATD3
+#define valveDirectionPinMode TRISBbits.TRISB8
+#define valveDirectionPin LATBbits.LATB8
+#define valveBreakPinMode TRISBbits.TRISB7
+#define valveBreakPin LATBbits.LATB7
+
 // directions
 #define CW 1
 #define CCW 0
 #define UP 0
 #define DOWN 1
+
+#define flowSensorPin pin1
+#define button1 pin2
+#define button2 pin3
 
 /* TODO Application specific user parameters used in user.c may go here */
 
@@ -76,5 +94,13 @@ long map(long x, long in_min, long in_max, long out_min, long out_max);
 // runs motor on port(1-6) with speed from -100 to 100)
 void runMotor(int port, int speed, bool direction);
 void setServo (int axis, int angle);
+void setServoRAW (int axis, int angle);
+
 
 void calibrate (int axis);
+void manualCalibration(void);
+
+void fillML(int volume);
+
+void openValve (void);
+void closeValve (void);

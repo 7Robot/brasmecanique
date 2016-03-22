@@ -14,6 +14,7 @@
 #include <stdint.h>          /* For uint32_t definition                       */
 #include <stdbool.h>         /* For true/false definition                     */
 #include <stdlib.h>
+#include <xc.h> 
 
 #include "system.h" 
 #include <libpic30.h>       //_delay_ms and other stuff
@@ -63,7 +64,10 @@ void InitApp(void) {
     PDC2 = 0;
     PDC3 = 0;
 
-
+    //setup input ports for buttons and flow sensor as inputs
+    pin1mode = 1;
+    pin2mode = 1;
+    pin3mode = 1;
 
 
     // configure direction pins as OUTPUTS
@@ -97,7 +101,13 @@ void InitApp(void) {
     potPin2mode = 1;
     potPin3mode = 1;
     potPin4mode = 1;
-
+    
+    valveControlPinMode = 0;
+    valveControlPin = 0;
+    valveDirectionPinMode = 0;
+    valveDirectionPin = 1;
+    valveBreakPinMode = 0;
+    valveBreakPin = 0;
 
     //----------ANALOG INPUTS CONFIGURATION-------------
 
@@ -130,37 +140,41 @@ void InitApp(void) {
     T1CONbits.TCKPS = 0b11; //Timer Input Clock Prescale (1/8/64/256) = 1:256
     T1CONbits.TSIDL = 0; //Continue timer operation in Idle mode
     T1CONbits.TON = 1; //start the timer
-    _T1IE = 1; // enable the interrupt
+    _T1IE = 0; // enable the interrupt
     _T1IP = 5; //interrupt priority
     PR1 = 100; // timer 1 period
     LED = 0;
 
 
     // OUTPUT COMPARE FOR PWM
+    // to generate PWM for head motors
 
-   
-    
+
+
     T2CONbits.TCS = 0; //Timer Clock Source Select - Internal clock (FOSC/4)
     T2CONbits.TCKPS = 0b00; //Timer Input Clock Prescale (1/8/64/256) = 1:1
     T2CONbits.TSIDL = 0; //Continue timer operation in Idle mode
     T2CONbits.TON = 1; //start the timer
     _T2IE = 0; // disable the interrupt
     _T2IP = 5; //interrupt priority
-    PR2 = 1000; // timer 1 period
-    
-    OC1RS=500;// duty cycle
-    OC1R=500;
+    PR2 = 200; // timer 1 period
+
+    // head motor 1
+    OC1RS = 0; // duty cycle
+    OC1R = 0;
     OC1CONbits.OCSIDL = 0; //Output compare x will continue to operate in CPU Idle mode
     OC1CONbits.OCTSEL = 0; //Timer2 is the clock source for compare x
     OC1CONbits.OCM = 0b110; //PWM mode on OCx, Fault pin disabled
     
-     OC2RS=200;// duty cycle
-    OC2R=200;
+    
+    // head motor 2
+    OC2RS = 0; // duty cycle
+    OC2R = 0;
     OC2CONbits.OCSIDL = 0; //Output compare x will continue to operate in CPU Idle mode
     OC2CONbits.OCTSEL = 0; //Timer2 is the clock source for compare x
     OC2CONbits.OCM = 0b110; //PWM mode on OCx, Fault pin disabled
-    
-    
+
+
 
 
     Init_Uart1();
@@ -257,9 +271,11 @@ void scanPots(void) {
     for (i = 0; i < 5; i++) {
         pot[i] = analogRead(i);
         // if (abs(pot[i]-oldPot[i]>10)) pot[i] = oldPot[i]; //additional filtering - if reading looks  strange (changed too fast), ignore it 
-        if (i == 0) actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 359);
-        if (i == 1) actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 90);
-        if (i == 2) actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 133);
+//        if (i == 0) actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 359);
+//        if (i == 1) actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 90);
+//        if (i == 2) actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 133);
+        
+
         //         if (i==0)       actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 359);
         //         if (i==0)       actualAngle[i] = map(pot[i], potMin[i], potMax[i], 0, 359);
         //  oldPot[i] = pot[i];
@@ -317,12 +333,21 @@ void runMotor(int port, int speed, bool direction) {
             break;
 
         case 3:
-
+            
             break;
 
         case 4:
-
+              if (speed == 0) {
+                OC2R = 0;
+               
+            } else {
+                OC2RS = speed; // duty cycle
+                OC2R = speed;
+                directionPin4 = !direction;
+            }
             break;
+            
+           
 
         case 5:
 
@@ -334,12 +359,24 @@ void runMotor(int port, int speed, bool direction) {
 
 void __attribute__((interrupt, auto_psv)) _T1Interrupt(void) {
 
-    LED = !LED;
+    //LED = !LED;
     // servo run routine
     scanPots();
-    setServo(0, servoAngle[0]);
-    setServo(1, servoAngle[1]);
-    setServo(2, servoAngle[2]);
+    setServoRAW(0, servoAngle[0]);
+    setServoRAW(1, servoAngle[1]);
+    setServoRAW(2, servoAngle[2]);
+    setServoRAW(4, servoAngle[4]); //head
+    
+   
+        
+     if (button2 == 1) {
+         openValve();
+         Transmit_String("Manual VALVE OPEN\r\n");
+         __delay_ms(100);
+         closeValve();
+         
+     }
+    
 
 
 
@@ -504,12 +541,12 @@ void setServo(int axis, int angle) {
 
             diff = actualAngle[axis] - angle;
 
-            if (diff > 1) {
-                speed = (abs(diff)*3);
+            if (diff > 3) {
+                speed = (abs(diff)*2)-10;
                 if (speed > 100) speed = 100;
                 runMotor(axis, speed, UP);
-            } else if (diff<-1) {
-                speed = (abs(diff)*3);
+            } else if (diff<-3) {
+                speed = (abs(diff)*2)-10;
                 if (speed > 100) speed = 100;
                 runMotor(axis, speed, DOWN);
             } else runMotor(axis, 0, UP);
@@ -544,4 +581,163 @@ void setServo(int axis, int angle) {
 
 
     }
+}
+
+void setServoRAW(int axis, int angle) {
+    long speed = 0;
+    int diff;
+    switch (axis) {
+        case 0:
+            diff = analogRead(axis) - angle;
+
+            if (diff > 0) {
+
+                speed = abs(diff)*2;
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, CCW);
+            } else if (diff < 0) {
+                speed = abs(diff)*2;
+                ;
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, CW);
+            } else runMotor(axis, 0, CW);
+
+            break;
+
+
+
+        case 1:
+
+            diff = analogRead(axis) - angle;
+
+            if (diff > 0) {
+                speed = (abs(diff)*2);
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, UP);
+            } else if (diff<0) {
+                speed = (abs(diff)*2);
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, DOWN);
+            } else runMotor(axis, 0, UP);
+            break;
+
+        case 2:
+            diff = analogRead(axis) - angle;
+
+            if (diff > 0) {
+                speed = (abs(diff)*2);
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, DOWN);
+            } else if (diff<-0) {
+                speed = (abs(diff)*2);
+                ;
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, UP);
+            } else runMotor(axis, 0, UP);
+            break;
+
+        case 3:
+
+            break;
+
+        case 4:
+            diff = analogRead(axis) - angle;
+
+            if (diff > 0) {
+                speed = (abs(diff));
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, DOWN);
+            } else if (diff< 0) {
+                speed = (abs(diff));
+                ;
+                if (speed > 100) speed = 100;
+                runMotor(axis, speed, UP);
+            } else runMotor(axis, 0, UP);
+            break;
+            break;
+
+        case 5:
+
+            break;
+
+
+    }
+}
+extern int cupAmmount;
+
+int cupXposition [16];
+int cupYposition [16];
+int cupZposition [16];
+int cupHeadposition [16];
+
+
+
+void manualCalibration(void) {
+    Transmit_String("Manual Calibration STARTED\r\n");
+
+
+
+    int currentCup;
+    for (currentCup = 0; currentCup < cupAmmount; currentCup++) {
+
+        while (button1 == 1) {
+        }//wait user to set first position and press the button
+
+        cupXposition[currentCup] = analogRead(0);
+        cupYposition[currentCup] = analogRead(1);
+        cupZposition[currentCup] = analogRead(2);
+        cupHeadposition[currentCup] = analogRead(4);
+
+        sprintf(&buffer[0], "Cup N%d: %d, %d, %d, %d\r\n", currentCup + 1, cupXposition[currentCup], cupYposition[currentCup], cupZposition[currentCup], cupHeadposition[currentCup]);
+
+        Transmit_String(&buffer[0]);
+        while (button1 == 0) {
+        }//wait user to release the button
+        __delay_ms(500); //debounce
+
+    }
+
+
+
+
+    Transmit_String("Manual Calibration ENDED\r\n");
+}
+
+void fillML(int volume) {
+    openValve();//open the valve
+    sprintf(&buffer[0], "Filling of %d ml started\r\n", volume);
+    Transmit_String(&buffer[0]);
+
+    bool oldstate = flowSensorPin;
+    int clicks = 0;
+    extern int clicksPerML;
+    int oldML=0;
+
+    while (clicks < volume * clicksPerML) {
+
+        bool newstate = flowSensorPin;
+        if (newstate != oldstate) {
+            clicks++;
+            oldstate = newstate;
+            int newML = clicks / clicksPerML;
+
+            if (newML != oldML) {
+                                
+                Transmit_String(&buffer[0]);
+                oldML = newML;
+            }
+        }
+    }
+    closeValve();
+    Transmit_String("Filling ended\r\n");
+}
+
+void openValve (void)
+{
+    valveControlPin = 1;
+}
+
+void closeValve (void)
+{
+    valveControlPin = 0;
 }

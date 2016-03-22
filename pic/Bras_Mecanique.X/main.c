@@ -47,79 +47,89 @@ extern int pot0center;
 extern volatile int actualAngle[];
 extern volatile int servoAngle[];
 
-// 0 : 0/360/644 : Z axis 230/511/798
-// 1 : 385/217
-// 2 : 579/350
-// 3 : 0/400   400 = 360deg
-// 4 : 
 int c1, c2, c3, c4, c5 = 0;
+
+int cupAmmount = 16; // total ammount of cups on the plate +1 for waiting position
+int clicksPerML = 4; //flow sensor clicks per 1 ml
+int volumeToFill = 50; // required volume of beer for each cup
 
 char buffer[30];
 int coordMassivePointer = 0;
+
+extern int cupXposition [];
+extern int cupYposition [];
+extern int cupZposition [];
+extern int cupHeadposition [];
 
 /******************************************************************************/
 /* Main Program                                                               */
 
 /******************************************************************************/
-void stopmotor(void) {
 
-    PDC1 = 0;
-    PWMCON1bits.PEN1H = 0;
-    //setup LED pin
-
-}
 
 int16_t main(void) {
-    int i;
+
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
     /* Initialize IO ports and peripherals */
     InitApp();
-  
-//if (courseEndPin != 0) { // if robot is turned on with at least one axis in limit position, skip the calibration and use default values
-//    calibrate(0);
-//    calibrate(1); 
-//    calibrate(2);
-//   
-//}
-    
-    servoAngle[0] = 180;
-    servoAngle[1] = 0;
-    servoAngle[2] = 0;
- 
+
+    //if (courseEndPin != 0) { // if robot is turned on with at least one axis in limit position, skip the calibration and use default values
+    //    calibrate(0);
+    //    calibrate(1); 
+    //    calibrate(2);
+    //   
+    //}
+    Transmit_String("\r\n");
+
+    manualCalibration();
+    __delay_ms(100);
+
+    _T1IE = 1; //enable T1 interrupt, i.e. start servoing
+
+
+
+
+    //main cycle
     while (1) {
         //        PDC1 = 0;
-         receiveCommand();
-         
+        //receiveCommand();
 
-//        servoAngle[0] = 180;
-//         __delay_ms(4000);
-//        servoAngle[0] = 90;
-//         __delay_ms(4000);
-//         servoAngle[0] = 270;
-//         __delay_ms(4000);
-//        setServo(0, 180);
-//        __delay_ms(4000);
-//        setServo(0, 160);
-//        __delay_ms(4000);
-//        setServo(0, 180);
-//        __delay_ms(4000);
-        
-//Transmit_String("==================\r\n");
-//     __delay_ms(10);
-//        for (i = 0; i < 5; i++) {
-//
-//            sprintf(&buffer[0], "%d: %d, %d\r\n", i, pot[i], actualAngle[i]);
-//            __delay_ms(10);
-//            Transmit_String(&buffer[0]);
-//            __delay_ms(20);
-//        }
-//
-//__delay_ms(200);
-       // LED = !LED;
- 
-    
+        //go to the waiting position
+        servoAngle[0] = cupXposition[cupAmmount - 1]; //-1 because array starts from 0
+        servoAngle[1] = cupYposition[cupAmmount - 1];
+        servoAngle[2] = cupZposition[cupAmmount - 1];
+        servoAngle[4] = cupHeadposition[cupAmmount - 1];
+
+        while (button1 == 1) { //button1 logic is reversed, i.e. there is voltage while it's not pressed
+            // wait for the button
+        }
+
+        //start filling process
+        int currentCup;
+        for (currentCup = 0; currentCup < cupAmmount - 1; currentCup++) {
+            servoAngle[0] = cupXposition[currentCup];
+            servoAngle[1] = cupYposition[currentCup] - 40;
+            servoAngle[2] = cupZposition[currentCup] + 20;
+            servoAngle[4] = cupHeadposition[currentCup];
+            __delay_ms(200);
+
+            servoAngle[1] = cupYposition[currentCup];
+            servoAngle[2] = cupZposition[currentCup];
+            __delay_ms(500);
+
+
+            fillML(volumeToFill);
+            __delay_ms(200);
+
+            servoAngle[1] = cupYposition[currentCup] - 40;
+            servoAngle[2] = cupZposition[currentCup] + 20;
+            __delay_ms(200);
+
+        }
+
+
 
     }
 }
